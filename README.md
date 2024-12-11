@@ -49,3 +49,5 @@ So-far:
 Next:
 - Upsert block JSON data to SQL table, if updated_at is superseded
 - Review data quality (on-going thing, check for general usability by querying)
+
+More details in commit b732a57 message 
