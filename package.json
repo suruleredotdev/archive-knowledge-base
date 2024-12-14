@@ -10,7 +10,12 @@
   "license": "ISC",
   "dependencies": {
     "@types/are.na": "^0.1.4",
+    "@types/node": "^22.10.2",
     "are.na": "^0.1.5",
     "sqlite3": "^5.1.7"
+  },
+  "type": "module",
+  "devDependencies": {
+    "tsx": "^4.19.2"
   }
 }
