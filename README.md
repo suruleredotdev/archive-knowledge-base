@@ -25,8 +25,8 @@ CREATE TABLE IF NOT EXISTS "block" (
   title                string,
   description          string,
   metadata             string,                     -- Generic metadata
-  created_at           timestamp,
-  updated_at           timestamp,
+  created_at           timestamp DEFAULT CURRENT_TIMESTAMP,
+  updated_at           timestamp DEFAULT CURRENT_TIMESTAMP,
   full_json            TEXT
 );
 ```
