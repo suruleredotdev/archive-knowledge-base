@@ -1,15 +1,15 @@
-const Arena = require("are.na");
+import Arena from "are.na";
 // const toolConfig = require("./tool-config.json");
-const sqlite3 = require("sqlite3").verbose();
+import sqlite3 from "sqlite3";
 
 const LOG_LEVEL = process.env.LOG_LEVEL || "INFO";
 
 const ARENA_USER = {
   slug: "korede-aderele",
   id: 60392,
-  token: process.env.ARENA_PERSONAL_ACCESS_TOKEN,
+  token: process.env.ARENA_PERSONAL_ACCESS_TOKEN
 };
-const ARENA_CHANNELS = [
+const ARENA_CHANNELS: Array<string> = [
   "Stream",
   "Permaculture",
   "Historiography",
@@ -22,40 +22,87 @@ const ARENA_CHANNELS = [
   "Nigeria Politics",
   "Maps",
   "Mutual Aid",
-  "Startup",
+  "Startup"
 ];
 
 const db = new sqlite3.Database(process.env.DB_PATH || "./store.sqlite3");
-const arenaClient = new Arena({accessToken: ARENA_USER.token});
+const arenaClient = new Arena({ accessToken: ARENA_USER.token });
 
-async function saveArenaBlock(db, {arenaBlockId, sourceUrl, fullJson}) {
+async function saveArenaBlock(
+  db: sqlite3.Database,
+  {
+    arenaBlockId,
+    sourceUrl,
+    fullJson,
+    crawledText,
+    title,
+    description,
+    metadata
+  }: {
+    arenaBlockId: string;
+    sourceUrl: string;
+    fullJson: string;
+    crawledText: string;
+    title: string;
+    description: string;
+    metadata: string;
+  }
+) {
   return await db.run(
     `INSERT INTO "block" (
-      block_id,
-      block_source_url,
-      full_json
-     ) VALUES (?, ?, ?)
-      ON CONFLICT (block_id)
-      DO UPDATE SET block_source_url = excluded.block_source_url,
+      id,
+      source_url,
+      full_json,
+      crawled_text,
+      title,
+      description,
+      metadata
+     ) VALUES (
+      ?, ?, ?, ?, ?, ?, ?
+     )
+      ON CONFLICT (id)
+      DO UPDATE SET
+        source_url = excluded.source_url,
         full_json = excluded.full_json,
-        updated_at = DATE();`,
-    [arenaBlockId, sourceUrl, fullJson]
+        crawled_text = excluded.crawled_text,
+        title = excluded.title,
+        description = excluded.description,
+        metadata = excluded.metadata,
+        updated_at = CURRENT_TIMESTAMP;`,
+    [
+      arenaBlockId,
+      sourceUrl,
+      fullJson,
+      crawledText,
+      title,
+      description,
+      metadata
+    ]
   );
 }
 
-async function getArenaBlocks(arenaClient, {postNewBlocksSince, postNewBlocksTill}) {
+async function getArenaBlocks(
+  arenaClient: Arena,
+  {
+    postNewBlocksSince,
+    postNewBlocksTill
+  }: {
+    postNewBlocksSince: Date;
+    postNewBlocksTill: Date;
+  }
+): Promise<Record<string, Arena.Block>> {
   const channels = await arenaClient.user(ARENA_USER.id).channels();
   if (LOG_LEVEL === "DEBUG") {
     console.log("ARENA channels resp", {
       length: channels?.length,
-      titles: channels?.map((c) => c.title),
-      first: channels[0],
+      titles: channels?.map(c => c.title),
+      first: channels[0]
     });
   }
 
   const blocksToSync: Record<string, Arena.Block> = {};
   const allChannelNames = new Set();
-  const blockChannelsMap: Map<String: block_id, Set<String>> = {};
+  const blockChannelsMap: Record<string, Set<string>> = {};
 
   try {
     for (var i = 0; i < channels.length; i++) {
@@ -74,12 +121,8 @@ async function getArenaBlocks(arenaClient, {postNewBlocksSince, postNewBlocksTil
       for (var j = 0; j < channel.contents?.length; j++) {
         const block = channel.contents[j];
 
-        let block_connected_date = new Date(
-          Math.min.apply(null, [
-            new Date(block["connected_at"]),
-            new Date(block["connected_at"]),
-          ])
-        );
+        // TODO: this should parse connections to the current channel
+        let block_connected_date = new Date(block["created_at"]);
 
         if (LOG_LEVEL === "DEBUG") {
           console.log(
@@ -114,7 +157,7 @@ async function getArenaBlocks(arenaClient, {postNewBlocksSince, postNewBlocksTil
           name: channel.title,
           blocks_preview: channel.contents
             ?.slice(0, 5)
-            .map((block) => block.title),
+            .map(block => block.title)
         });
       }
     }
@@ -132,16 +175,30 @@ async function runMain() {
     postNewBlocksTill: new Date()
   };
   if (LOG_LEVEL === "DEBUG") console.log("ARGS", args);
-  const {postNewBlocksSince, postNewBlocksTill} = args;
+  const { postNewBlocksSince, postNewBlocksTill } = args;
 
-  const blocks = await getArenaBlocks(arenaClient, {postNewBlocksSince, postNewBlocksTill})
+  const blocks = await getArenaBlocks(arenaClient, {
+    postNewBlocksSince,
+    postNewBlocksTill
+  });
 
-  // for (const [blockId, blockData] of Object.entries(blocks)) {
-  //   await saveArenaBlock(db, {
-  //     arenaBlockId: blockId,
-  //     sourceUrl: blockData.
-  //   })
-  // }
+  for (const [blockId, blockData] of Object.entries(blocks)) {
+    await saveArenaBlock(db, {
+      arenaBlockId: blockId,
+      sourceUrl: blockData.source?.url,
+      fullJson: JSON.stringify(blockData),
+      crawledText: blockData.content,
+      title: blockData.title,
+      description: blockData.description,
+      metadata: "" // figure this out later
+    });
+  }
 }
 
 runMain()
+  .then(() => {
+    console.log("done");
+  })
+  .catch(e => {
+    console.log("error", e);
+  });
