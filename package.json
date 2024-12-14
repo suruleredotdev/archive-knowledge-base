@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/are.na": "^0.1.4",
     "are.na": "^0.1.5",
     "sqlite3": "^5.1.7"
   }
