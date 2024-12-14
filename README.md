@@ -14,7 +14,6 @@ from a RAG "Retriaval-Augmented Generation" system by a (LLM) Large Language Mod
 
 # Data Storage
 
-
 ## Blocks
 Initial indexing table will take this form:
 
@@ -35,10 +34,23 @@ CREATE TABLE IF NOT EXISTS "block" (
 The general algorithm for indexing from Are.na will involve readig a block from the Are.na API, and if it does not yet exist in the database, or hasn't yet been
 
 
-
 # Project Tracker
 
-### Wed Dec 11 2024 1:23 
+## Projects
+
+- Sync Are.na data to SQL database
+
+## Dev Log
+
+### Fri Dec 13 2024 5:01pm
+
+Goals:
+- [ ] Upsert block JSON data to SQL table, if updated_at is superseded
+  - Take pulled JSON data and insert into database rows including
+    all corresponding fields from above
+
+
+### Wed Dec 11 2024 1:23am
 
 So-far:
 - Ported an earlier script to do the simple download of a date range 
@@ -51,3 +63,5 @@ Next:
 - Review data quality (on-going thing, check for general usability by querying)
 
 More details in commit b732a57 message 
+
+
