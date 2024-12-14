@@ -110,7 +110,7 @@ async function getArenaBlocks(
 
       if (!ARENA_CHANNELS.includes(channel.title)) continue;
 
-      if (LOG_LEVEL === "INFO") console.info(JSON.stringify(channel));
+      // if (LOG_LEVEL === "INFO") console.info(JSON.stringify(channel));
       if (!channel.contents) {
         if (LOG_LEVEL === "DEBUG") {
           console.log(`Skipping channel idx ${i} due to empty contents`);
@@ -137,7 +137,7 @@ async function getArenaBlocks(
           block_connected_date > postNewBlocksSince &&
           block_connected_date <= postNewBlocksTill
         ) {
-          if (LOG_LEVEL === "INFO") console.info(JSON.stringify(channel));
+          if (LOG_LEVEL === "INFO") console.info(JSON.stringify(block));
           blocksToSync[block.id] = block;
           if (block.id in blockChannelsMap) {
             blockChannelsMap[block.id].add(channel.title);
@@ -171,7 +171,7 @@ async function getArenaBlocks(
 
 async function runMain() {
   const args = {
-    postNewBlocksSince: new Date("2024/01/01"),
+    postNewBlocksSince: new Date("2022/01/01"),
     postNewBlocksTill: new Date()
   };
   if (LOG_LEVEL === "DEBUG") console.log("ARGS", args);

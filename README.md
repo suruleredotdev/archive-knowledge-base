@@ -45,9 +45,28 @@ The general algorithm for indexing from Are.na will involve readig a block from 
 ### Fri Dec 13 2024 5:01pm
 
 Goals:
-- [ ] Upsert block JSON data to SQL table, if updated_at is superseded
+- [x] Upsert block JSON data to SQL table, if updated_at is superseded
   - Take pulled JSON data and insert into database rows including
     all corresponding fields from above
+
+Log:
+- 6:10pm Successfully setup script to upsert rows based on Are.na blocks
+  - Updated script to typescript and added types
+  - Confirmed data in DB
+    - Saw the following in the DB
+      ```sql
+      sqlite> select title from block;
+      Yoruba Gurus: Indigenous Production of Knowledge in Africa By Toyin Falola
+      Akure–Benin War - Wikipedia
+      Finding Bàrà: History at an Empire Town - Olongo Africa
+      Yoruba people - Wikipedia
+      Ife (from ca. 6th Century) | Essay | The Metropolitan Museum of Art | Heilbrunn Timeline of Art History
+      Collection of carved planks and beams from Yoruba Temples
+      ```
+    - Noticed what I've seen earlier with Are.na only returning a subset of data intermittently
+  - NEXT: switching gears to see what actionable info can be pulled from this
+    - Noticing that only some blocks have their crawled text indexed by Are.na. It seems Are.na does this optimistically
+      based on user navigation. Can I do this via Are.na client/API?
 
 
 ### Wed Dec 11 2024 1:23am
