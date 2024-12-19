@@ -39,8 +39,22 @@ The general algorithm for indexing from Are.na will involve readig a block from 
 ## Projects
 
 - Sync Are.na data to SQL database
+- Create knowledge database compatible with LLMs (RAG)
 
 ## Dev Log
+
+### Wednesday Dec 18 2024 8:10pm
+Goals:
+- [x] Pull all block data, filter down to relevant data, get content and convert to Markdown
+  - Did this for Wikipedia data only for now
+  - Will later do other known text sites
+  - Lastly will do PDF data extraction to 
+
+- [] Push block data and content to SQL database
+
+- [] Generate chunks of block content and build text embeddings
+
+- [] Test cgenerating embeddings of data
 
 ### Fri Dec 13 2024 5:01pm
 
