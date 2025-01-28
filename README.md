@@ -43,6 +43,15 @@ The general algorithm for indexing from Are.na will involve readig a block from 
 
 ## Dev Log
 
+### Tuesday Jan 28 2025 10:00am
+
+- [x] Generate and test data scraping and vector storage libraries
+- [x] Generate and test local scripts
+- [x] Generate and test API server
+- [x] Setup Qdrant vector store (free 1GB cluster)
+  - [ ] Run scripts to populate vector store
+- [ ] Deploy API
+
 ### Wednesday Dec 18 2024 8:10pm
 Goals:
 - [x] Pull all block data, filter down to relevant data, get content and convert to Markdown
