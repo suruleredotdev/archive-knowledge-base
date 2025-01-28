@@ -32,7 +32,7 @@ def main():
     setup_logging(debug=args.debug)
     
     # Initialize DB and vector store
-    conn = sqlite3.connect('store.sqlite3')
+    conn = sqlite3.connect('../../store.sqlite3')
     init_db(conn)
     
     if not args.skip_vectors:

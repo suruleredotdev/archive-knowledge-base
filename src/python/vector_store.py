@@ -17,7 +17,7 @@ class VectorStore:
         vector_size: int = 384,
         host: Optional[str] = None,
         port: Optional[int] = None,
-        path: str = "./qdrant_data",
+        path: str = "../../qdrant_data",
     ):
         """
         Initialize vector store with either local or remote Qdrant
