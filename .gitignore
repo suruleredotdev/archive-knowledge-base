@@ -2,3 +2,4 @@
 *.sqlite*
 node_modules/
 blocks-synced-*.txt
+qdrant_data/
