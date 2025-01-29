@@ -1,0 +1,160 @@
+<head>
+    <style>
+      body { margin: 0; } 
+
+      .node-label {
+        font-size: 12px;
+        padding: 1px 4px;
+        border-radius: 4px;
+        background-color: rgba(255, 255, 255, 0.5);
+        user-select: none;
+      }
+
+      .node-label:hover {
+        background-color: rgba(255, 255, 255, 1);
+        cursor: pointer;
+      }
+    </style>
+    <script src="https://unpkg.com/3d-force-graph"></script>
+    <!--<script src="../../dist/3d-force-graph.js"></script>-->
+
+  </head>
+  
+  <body>
+    <div id="3d-graph"></div>
+  
+    <script type="module">
+      import { CSS2DRenderer, CSS2DObject } from 'https://esm.sh/three/examples/jsm/renderers/CSS2DRenderer.js';
+
+      let initData = {
+        // Initial data points from vector store
+        nodes: [
+          {
+            id: 0,
+            title: "Root Node",
+            url: null
+          }
+        ],
+        links: []
+      };
+
+      const mapPointToNode = (result) => ({
+        id: result.id,
+        title: result.payload.title || 'Untitled',
+        description: result.payload.description || 'No description',
+        url: result.payload.source_url,
+        vector: result.vector, // Store vector for future expansions
+      });
+
+      const fetchInitData = async () => {
+        try {
+          const response = await fetch('.netlify/functions/searchVectors', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              query: {
+                sample: "random"
+              },
+              limit: 20, // Adjust the limit as needed
+              with_payload: true,
+              with_vector: true
+            })
+          });
+          const data = await response.json();
+          return data;
+        } catch (error) {
+          console.error('Error fetching initial data:', error);
+          return null;
+        }
+      };
+
+      const getInitData = async () => {
+        const data = await fetchInitData();
+        if (data) {
+          console.log("init", data);
+          const nodes = data.points.map((item) => mapPointToNode(item));
+          const links = [];
+          // Assuming there's a way to determine links based on the data
+          // This is a placeholder for actual link generation logic
+          // links = generateLinks(nodes);
+          return { nodes, links };
+        }
+        return null;
+      };
+
+      // Wrap the top-level code in an async IIFE
+      (async () => {
+        initData = await getInitData();
+
+        const elem = document.getElementById("3d-graph");
+
+        const Graph = new ForceGraph3D(elem, {
+          extraRenderers: [new CSS2DRenderer()]
+        })
+            .enableNodeDrag(false)
+            // .nodeThreeObject(node => {
+            //   const nodeEl = document.createElement('div');
+            //   nodeEl.textContent = node.title;
+            //   // nodeEl.style.color = node.color;
+            //   nodeEl.className = 'node-label';
+            //   nodeEl.onclick = () => expandNode(node);
+            //   return new CSS2DObject(nodeEl);
+            // })
+            .onNodeClick(expandNode)
+            .nodeLabel(node => node.title)
+            .graphData(initData);
+
+        async function expandNode(node) {
+          try {
+            // Make direct request to Qdrant API
+            const response = await fetch('.netlify/functions/searchVectors', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                query: { nearest: node.vector },
+                with_vector: true,
+              })
+            });
+
+            const results = await response.json();
+            console.log("results", results);
+            if (!results.points?.length) return;
+
+            const { nodes, links } = Graph.graphData();
+           
+            // Add new nodes from search results
+            const newNodes = results.points.map((result) => ({
+              ...mapPointToNode(result)
+            }));
+
+            // Add links from clicked node to new nodes
+            const newLinks = results.points.map((neighbor) => ({
+              source: node.id,
+              target: neighbor.id,
+              value: neighbor.score // Use similarity score for link strength
+            }));
+
+            // Update graph with new nodes and links
+            Graph.graphData({
+              nodes: [...nodes, ...newNodes],
+              links: [...links, ...newLinks]
+            });
+          } catch (err) {
+            console.error('Error expanding node:', err);
+          }
+        }
+
+        function removeNode(node) {
+          let { nodes, links } = Graph.graphData();
+          links = links.filter(l => l.source !== node && l.target !== node); // Remove links attached to node
+          nodes.splice(node.id, 1); // Remove node
+          nodes.forEach((n, idx) => { n.id = idx; }); // Reset node ids to array index
+          Graph.graphData({ nodes, links });
+        }
+      })(); // Immediately invoke the async function
+    </script>
+  </body>

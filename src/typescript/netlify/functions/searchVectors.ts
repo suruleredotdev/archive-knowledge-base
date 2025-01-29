@@ -1,8 +1,6 @@
 import type { Context } from "@netlify/functions";
 
 import { QdrantClient } from '@qdrant/js-client-rest';
-import { HuggingFaceTransformersEmbeddings } from "@langchain/community/embeddings/huggingface_transformers";
-
 
 export default async (req: Request, context: Context) => {
     const client = new QdrantClient({
@@ -15,29 +13,32 @@ export default async (req: Request, context: Context) => {
         return new Response("No body found", { status: 400 });
     }
 
-    if (!body?.query) {
-        return new Response("No query found", { status: 400 });
-    }
-
-    const query = body?.query;
+    const offset = body?.offset ? parseInt(body.offset) : 0;
     const limit = body?.limit ? parseInt(body.limit) : 10;
 
-    console.log("QUERY", query);
-    try {
-        const embeddings = new HuggingFaceTransformersEmbeddings({
-            model: "sentence-transformers/all-MiniLM-L6-v2",
-        });
-        const vector = await embeddings.embedQuery(query);
-        const result = await client.query("arena_blocks", {
-            query: {
-                vector: vector
-            },
-            limit: limit,
-            with_payload: true
-        });
-        console.log("RESULT", result);
+    const query = body?.query;
+    const with_vector = body?.with_vector ? body.with_vector : false;
 
-        return new Response(JSON.stringify(result), { status: 200 });
+    try {
+        if (query) {
+            const result = await client.query("arena_blocks", {
+                query:  query,
+                limit: limit,
+                with_payload: true,
+                with_vector: with_vector,
+            });
+
+            return new Response(JSON.stringify(result), { status: 200 });
+        } else {
+            const result = await client.scroll("arena_blocks", {
+                offset: offset,
+                limit: limit,
+                with_payload: true,
+                with_vector: with_vector,
+            });
+
+            return new Response(JSON.stringify(result), { status: 200 });
+        }
     } catch (error) {
         console.error("ERROR", error, error.message, error.statusText, error.data);
         return new Response("Error", { status: 500 });
