@@ -9,9 +9,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@huggingface/transformers": "^3.3.2",
+    "@langchain/community": "^0.3.27",
+    "@netlify/functions": "^3.0.0",
+    "@qdrant/js-client-rest": "^1.13.0",
     "@types/are.na": "^0.1.4",
     "@types/node": "^22.10.2",
     "are.na": "^0.1.5",
+    "langchain": "^0.3.14",
+    "sharp": "^0.33.5",
     "sqlite3": "^5.1.7"
   },
   "type": "module",
