@@ -26,7 +26,9 @@
       #sidebar {
         position: absolute;
         right: 0;
-        width: 200px;
+        bottom: 0;
+        overflow: scroll;
+        width: 500px;
         background: rgba(255, 255, 255, 0.8);
         padding: 10px;
         border-left: 1px solid #ccc;
@@ -48,6 +50,19 @@
         font: message-box;
         z-index: 1000;
       }
+
+     .preview-img:hover{
+        color: #424242; 
+        -webkit-transition: all .3s ease-in;
+        -moz-transition: all .3s ease-in;
+        -ms-transition: all .3s ease-in;
+        -o-transition: all .3s ease-in;
+        transition: all .3s ease-in;
+        opacity: 1;
+        transform: scale(1.15);
+        -ms-transform: scale(1.15); /* IE 9 */
+        -webkit-transform: scale(1.15); /* Safari and Chrome */
+      } 
     </style>
     <script src="https://unpkg.com/3d-force-graph"></script>
     <!--<script src="../../dist/3d-force-graph.js"></script>-->
@@ -61,6 +76,7 @@
     </div>
     <div id="sidebar">
         <b>Node Details</b>
+        <hr/>
         <div id="node-details">Click on a node to see details.</div>
     </div>
     <div id="3d-graph"></div>
@@ -86,6 +102,8 @@
         description: result.payload.description || 'No description',
         url: result.payload.source_url,
         vector: result.vector, // Store vector for future expansions
+        image: result.arenaData?.image?.square?.url,
+        imageLarge: result.arenaData?.image?.large?.url
       });
 
       const fetchInitData = async () => {
@@ -136,16 +154,9 @@
           extraRenderers: [new CSS2DRenderer()]
         })
             .enableNodeDrag(false)
-            // .nodeThreeObject(node => {
-            //   const nodeEl = document.createElement('div');
-            //   nodeEl.textContent = node.title;
-            //   // nodeEl.style.color = node.color;
-            //   nodeEl.className = 'node-label';
-            //   nodeEl.onclick = () => expandNode(node);
-            //   return new CSS2DObject(nodeEl);
-            // })
             .onNodeClick(expandNode)
             .nodeLabel(node => `<div class="node-label">
+              ${node.image ? `<img src="${node.imageLarge}" height="250px" class="preview-img"/> <br>` : ''}
               ${node.title} <br>
               ${node.description} <br/>
               <a href="${node.url}" target="_blank">${node.url}</a>
@@ -166,7 +177,9 @@
             document.getElementById("node-details").innerHTML = `
               <strong>Title:</strong> ${node.title} <br>
               <strong>Description:</strong> ${node.description} <br>
-              <strong>URL:</strong> <a href="${node.url}" target="_blank">${node.url}</a>
+              <strong>Source:</strong> <a href="${node.url}" target="_blank">${node.url}</a>
+              <a href="https://are.na/block/${node.id}" target="_blank"><strong>Context</strong> </a>
+              ${node.image ? `<img src="${node.imageLarge}" height="500px"/> <br>` : ''}
               <br>
               <br>
               <strong id="node-expanding-status">Expanding...</strong>

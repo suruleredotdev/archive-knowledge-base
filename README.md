@@ -43,6 +43,13 @@ The general algorithm for indexing from Are.na will involve readig a block from 
 
 ## Dev Log
 
+### Wednesday Jan 29 2025 1:45pm-
+- [x] Create API using Netlify function
+- [x] Build basic raw HTML frontend
+- [x] Setup Netlify deploy from Github
+- [ ] Pull in more informmation from Are.na
+    in order to achieve a more media-rich display
+
 ### Tuesday Jan 28 2025 10:00am
 
 - [x] Generate and test data scraping and vector storage libraries

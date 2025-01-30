@@ -21,6 +21,9 @@ export default async (req: Request, context: Context) => {
 
     try {
         const result = await executeQueryOrScroll(client, query, offset, limit, with_vector);
+        for (let i = 0; i < result.points.length; i++) {
+            result.points[i].arenaData = await getArenaData(result.points[i].id);
+        }
         return new Response(JSON.stringify(result), { status: 200 });
     } catch (error) {
         console.error("ERROR", error, error.message, error.statusText, error.data);
@@ -47,5 +50,30 @@ async function executeQueryOrScroll(client: QdrantClient, query: any, offset: nu
         });
 
         return result;
+    }
+}
+
+async function getArenaData(blockId: string | number) {
+    const ARENA_API_URL = 'https://api.are.na/v2';
+    const ARENA_API_KEY = process.env.ARENA_API_KEY;
+
+    try {
+        const response = await fetch(`${ARENA_API_URL}/blocks/${blockId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${ARENA_API_KEY}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch arena data for block ${blockId}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching arena data for block ${blockId}:', error);
+        return null;
     }
 }
