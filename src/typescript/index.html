@@ -148,6 +148,8 @@
       (async () => {
         initData = await getInitData();
 
+        let highlightedNode = null;
+
         const elem = document.getElementById("3d-graph");
 
         const Graph = new ForceGraph3D(elem, {
@@ -155,6 +157,8 @@
         })
             .enableNodeDrag(false)
             .onNodeClick(expandNode)
+            .nodeColor(node => node.id === highlightedNode?.id ? "blue" : "green")
+            // .nodeVal(node => node.title)
             .nodeLabel(node => `<div class="node-label">
               ${node.image ? `<img src="${node.imageLarge}" height="250px" class="preview-img"/> <br>` : ''}
               ${node.title} <br>
@@ -162,6 +166,8 @@
               <a href="${node.url}" target="_blank">${node.url}</a>
             </div>`
             )
+            .linkLabel('score')
+            .linkColor(() => '#a6a6a6')
             .graphData(initData);
 
         const deduplicatePoints = (existingPoints, foundPoints) => {
@@ -172,6 +178,7 @@
         };
 
         async function expandNode(node) {
+          highlightedNode = node;
           try {
             // Update sidebar with node details
             document.getElementById("node-details").innerHTML = `
