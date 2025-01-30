@@ -14,6 +14,17 @@
         background-color: rgba(255, 255, 255, 1);
         cursor: pointer;
       }
+
+      #sidebar {
+        position: absolute;
+        right: 0;
+        width: 200px;
+        background: rgba(255, 255, 255, 0.8);
+        padding: 10px;
+        border-left: 1px solid #ccc;
+        font: message-box;
+        z-index: 1000;
+      }
     </style>
     <script src="https://unpkg.com/3d-force-graph"></script>
     <!--<script src="../../dist/3d-force-graph.js"></script>-->
@@ -21,6 +32,10 @@
   </head>
   
   <body>
+    <div id="sidebar">
+        <h3>Node Details</h3>
+        <div id="node-details">Click on a node to see details.</div>
+    </div>
     <div id="3d-graph"></div>
   
     <script type="module">
@@ -103,11 +118,33 @@
             //   return new CSS2DObject(nodeEl);
             // })
             .onNodeClick(expandNode)
-            .nodeLabel(node => node.title)
+            .nodeLabel(node => `<div class="node-label">
+              ${node.title} <br>
+              ${node.description} <br/>
+              <a href="${node.url}" target="_blank">${node.url}</a>
+            </div>`
+            )
             .graphData(initData);
+
+        const deduplicatePoints = (existingPoints, foundPoints) => {
+          // Returns array of found points that are not in existing points
+          // deduplication is done by id
+          const existingIds = new Set(existingPoints.map((point) => point.id));
+          return foundPoints.filter((point) => !existingIds.has(point.id));
+        };
 
         async function expandNode(node) {
           try {
+            // Update sidebar with node details
+            document.getElementById("node-details").innerHTML = `
+              <strong>Title:</strong> ${node.title} <br>
+              <strong>Description:</strong> ${node.description} <br>
+              <strong>URL:</strong> <a href="${node.url}" target="_blank">${node.url}</a>
+              <br>
+              <br>
+              <strong id="node-expanding-status">Expanding...</strong>
+            `;
+
             // Make direct request to Qdrant API
             const response = await fetch('.netlify/functions/searchVectors', {
               method: 'POST',
@@ -140,9 +177,11 @@
 
             // Update graph with new nodes and links
             Graph.graphData({
-              nodes: [...nodes, ...newNodes],
+              nodes: [...nodes, ...deduplicatePoints(nodes, newNodes)],
               links: [...links, ...newLinks]
             });
+
+            document.getElementById("node-expanding-status").innerHTML = `Expanded: ${results.points.length} links`;
           } catch (err) {
             console.error('Error expanding node:', err);
           }
