@@ -1,6 +1,14 @@
 <head>
     <style>
-      body { margin: 0; } 
+      :root {
+        --bg-size: 25px;
+        --bg-image: url(https://v1.surulere.dev/assets/img/suruleredotdev_background.svg);
+      }
+      body {
+        margin: 0; 
+        background-image: var(--bg-image);
+        background-size: var(--bg-size);
+      } 
 
       .node-label {
         font-size: 12px;
@@ -25,6 +33,21 @@
         font: message-box;
         z-index: 1000;
       }
+
+      #titlebar  {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        background-image: var(--bg-image);
+        color: #0a3d01;
+        background-size: var(--bg-size);
+        padding: 10px;
+        border-bottom: 1px solid #ccc;
+        font: message-box;
+        z-index: 1000;
+      }
     </style>
     <script src="https://unpkg.com/3d-force-graph"></script>
     <!--<script src="../../dist/3d-force-graph.js"></script>-->
@@ -32,8 +55,12 @@
   </head>
   
   <body>
+    <div id="titlebar">
+        <a href="https://surulere.dev" target="_blank"><b>SURULERE.DEV</b></a>
+        <div>3D Archive</div>
+    </div>
     <div id="sidebar">
-        <h3>Node Details</h3>
+        <b>Node Details</b>
         <div id="node-details">Click on a node to see details.</div>
     </div>
     <div id="3d-graph"></div>
