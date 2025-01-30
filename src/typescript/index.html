@@ -228,7 +228,9 @@
               links: [...links, ...newLinks]
             });
 
-            document.getElementById("node-expanding-status").innerHTML = `Expanded: ${results.points.length} links`;
+            const linkDisplays = results.points.map(link => `<a href="${link.payload.source_url}" target="_blank">${link.payload.title}</a>`)
+            console.log(linkDisplays, results.points)
+            document.getElementById("node-expanding-status").innerHTML = `Expanded: ${results.points.length} links: ${linkDisplays.join(", ")}`;
           } catch (err) {
             console.error('Error expanding node:', err);
           }
