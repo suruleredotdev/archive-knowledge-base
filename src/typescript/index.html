@@ -168,6 +168,7 @@
             )
             .linkLabel('score')
             .linkColor(() => '#a6a6a6')
+            .zoomToFit(2, 10, () => !!highlightedNode ? node.id === highlightedNode?.id : true)
             .graphData(initData);
 
         const deduplicatePoints = (existingPoints, foundPoints) => {
